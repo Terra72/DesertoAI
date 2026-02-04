@@ -6,7 +6,8 @@ STATE_PATH = Path("memory/state.json")
 
 def load_state():
     if not STATE_PATH.exists():
-        return {}
+        template = Path("memory/state.template.json")
+        return json.loads(template.read_text())
     return json.loads(STATE_PATH.read_text())
 
 def save_state(state):
