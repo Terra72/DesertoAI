@@ -1,6 +1,8 @@
 {
   "global_summary": "",
   "regions": {},
-  "sources_seen": [],
-  "last_run": "2026-02-04T12:04:23.227145"
+  "sources_seen": [
+    "paper-001"
+  ],
+  "last_run": "2026-02-04T12:14:57.758470"
 }

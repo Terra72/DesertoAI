@@ -1,0 +1,9 @@
+def fetch_items():
+    return [
+        {
+            "id": "paper-001",
+            "title": "Farmer-managed natural regeneration improves soil stability in the Sahel",
+            "summary": "Study shows FMNR increases vegetation cover and reduces erosion.",
+            "source": "Journal of Arid Environments"
+        }
+    ]
