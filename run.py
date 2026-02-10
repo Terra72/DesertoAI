@@ -4,31 +4,42 @@ load_dotenv()
 from datetime import datetime, UTC
 from memory.store import load_state, save_state
 from ingest.rss import fetch_items
-from trigger.filter import decide
+from trigger.filter import decide, score
 
 from analyze.summarize import summarize
 from analyze.region import detect_region
 from analyze.confidence import confidence_delta
 
+import argparse
+
+parser = argparse.ArgumentParser()
+parser.add_argument("--force", "-f", action="store_true", help="Reprocess items even if already analyzed")
+parser.add_argument("--dry-run", "-d", action="store_true",help="Run pipeline without writing state or outputs")
+
+args = parser.parse_args()
+FORCE_REFRESH = args.force
+DRY_RUN = args.dry_run
 
 def main():
     
     state = load_state()
     items = fetch_items()
 
+    if FORCE_REFRESH:
+        print("FORCE MODE: Reprocessing all items (state will be updated)")
+    if DRY_RUN:
+        print("DRY RUN: No state will be written, no files will be modified")
+
     seen = set(state.get("sources_seen", []))
-    new_items = []
 
     for item in items:
-        if item["id"] not in seen:
+        if not FORCE_REFRESH and item["id"] in seen:
+            continue
+        if not DRY_RUN:
             seen.add(item["id"])
-            new_items.append(item)
 
-    state["sources_seen"] = list(seen)
-
-    for item in new_items:
         decision = decide(item)
-
+        print(f"SCORE {score(item):.2f} → {decision.upper()} | {item['title']}")
         if decision == "consider":
             result = summarize(item, state.get("global_summary", ""))
 
@@ -72,7 +83,9 @@ def main():
 
 
     state["last_run"] = datetime.now(UTC).isoformat()
-    save_state(state)
+    if not DRY_RUN:
+        state["sources_seen"] = list(seen)
+        save_state(state)
 
 if __name__ == "__main__":
     main()
