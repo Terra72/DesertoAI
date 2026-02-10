@@ -1,10 +1,14 @@
 from dotenv import load_dotenv
 load_dotenv()
 
+from datetime import datetime, UTC
 from memory.store import load_state, save_state
-from ingest.fake import fetch_items
+from ingest.rss import fetch_items
 from trigger.filter import decide
+
 from analyze.summarize import summarize
+from analyze.region import detect_region
+from analyze.confidence import confidence_delta
 
 
 def main():
@@ -30,9 +34,12 @@ def main():
 
             if result["novel"]:
                 update = result["update"]
+                region = detect_region(item)
 
+                # --- GLOBAL MEMORY ---
                 state["global_updates"].append({
                     "source": item["title"],
+                    "region": region,
                     "update": update
                 })
 
@@ -40,13 +47,31 @@ def main():
                     state["global_summary"] + "\n" + update
                 ).strip()
 
-                print(f"UPDATED: {item['title']}")
+                # --- REGIONAL MEMORY ---
+                if region not in state["regions"]:
+                    state["regions"][region] = {
+                        "summary": "",
+                        "confidence": 0.0,
+                        "updates": []
+                    }
+
+                state["regions"][region]["updates"].append(update)
+                state["regions"][region]["summary"] = (
+                    state["regions"][region]["summary"] + "\n" + update
+                ).strip()
+
+                state["regions"][region]["confidence"] += confidence_delta(item["source"])
+
+                print(f"UPDATED ({region}): {item['title']}")
+
             else:
                 print(f"REINFORCED: {item['title']}")
 
         else:
             print(f"IGNORED: {item['title']}")
 
+
+    state["last_run"] = datetime.now(UTC).isoformat()
     save_state(state)
 
 if __name__ == "__main__":
