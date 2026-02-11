@@ -7,10 +7,13 @@ from ingest.rss import fetch_items
 from trigger.filter import decide, score
 
 from analyze.summarize import summarize
-from analyze.region import detect_region
 from analyze.confidence import confidence_delta
 from analyze.embedding import embed_text, cosine_similarity
 from analyze.region_semantic import ensure_region_vectors
+from analyze.region_semantic import detect_region_semantic
+from analyze.topic_semantic import ensure_topic_vectors
+from analyze.topic_semantic import detect_topic_semantic
+
 import numpy as np
 
 import argparse
@@ -26,6 +29,8 @@ DRY_RUN = args.dry_run
 def main():
     
     state = load_state()
+    ensure_region_vectors(state)
+    ensure_topic_vectors(state)
     # 6B — Initialize desert concept vector (one-time)
     if not state.get("desert_vector"):
         print("Initializing desertification concept vector...")
@@ -48,7 +53,7 @@ def main():
             save_state(state)
 
     items = fetch_items()
-    ensure_region_vectors(state)
+    
     if FORCE_REFRESH:
         print("FORCE MODE: Reprocessing all items (state will be updated)")
     if DRY_RUN:
@@ -86,15 +91,21 @@ def main():
             if result["novel"]:
                 update = result["update"]
                 # Region Semantic
-                from analyze.region_semantic import detect_region_semantic
+
                 region_text = item["title"] + " " + item.get("summary", "")
                 region, region_score = detect_region_semantic(region_text, state)
                 print(f"REGION {region} ({region_score:.2f})")
 
+                # topic semantic
+                topic_text = item["title"] + " " + item.get("summary", "")
+                topic, topic_score = detect_topic_semantic(topic_text, state)
+
+                print(f"TOPIC {topic} ({topic_score:.2f})")
                 # --- GLOBAL MEMORY ---
                 state["global_updates"].append({
                     "source": item["title"],
                     "region": region,
+                    "topic": topic,
                     "update": update
                 })
 
@@ -118,6 +129,12 @@ def main():
                 state["regions"][region]["confidence"] += confidence_delta(item["source"])
 
                 print(f"UPDATED ({region}): {item['title']}")
+                # Track topic stats
+                if "topics" not in state:
+                    state["topics"] = {}
+                    if topic not in state["topics"]:
+                        state["topics"][topic] = 0
+                    state["topics"][topic] += 1
 
             else:
                 print(f"REINFORCED: {item['title']}")
