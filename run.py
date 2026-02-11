@@ -4,42 +4,108 @@ load_dotenv()
 from datetime import datetime, UTC
 from memory.store import load_state, save_state
 from ingest.rss import fetch_items
-from trigger.filter import decide
+from trigger.filter import decide, score
 
 from analyze.summarize import summarize
-from analyze.region import detect_region
 from analyze.confidence import confidence_delta
+from analyze.embedding import embed_text, cosine_similarity
+from analyze.region_semantic import ensure_region_vectors
+from analyze.region_semantic import detect_region_semantic
+from analyze.topic_semantic import ensure_topic_vectors
+from analyze.topic_semantic import detect_topic_semantic
 
+import numpy as np
+
+import argparse
+
+parser = argparse.ArgumentParser()
+parser.add_argument("--force", "-f", action="store_true", help="Reprocess items even if already analyzed")
+parser.add_argument("--dry-run", "-d", action="store_true",help="Run pipeline without writing state or outputs")
+
+args = parser.parse_args()
+FORCE_REFRESH = args.force
+DRY_RUN = args.dry_run
 
 def main():
     
     state = load_state()
+    ensure_region_vectors(state)
+    ensure_topic_vectors(state)
+    # 6B — Initialize desert concept vector (one-time)
+    if not state.get("desert_vector"):
+        print("Initializing desertification concept vector...")
+
+        concept_text = """
+        Desertification mitigation, land restoration, soil regeneration,
+        dryland ecosystem recovery, agroforestry, water retention,
+        drought resilience, FMNR, sand stabilization,
+        sustainable land management, nature-based solutions for drylands
+        """
+
+        vec = embed_text(concept_text)
+
+        if vec is None:
+            raise RuntimeError("Embedding failed — desert vector is None")
+
+        state["desert_vector"] = vec.tolist()
+
+        if not DRY_RUN:
+            save_state(state)
+
     items = fetch_items()
+    
+    if FORCE_REFRESH:
+        print("FORCE MODE: Reprocessing all items (state will be updated)")
+    if DRY_RUN:
+        print("DRY RUN: No state will be written, no files will be modified")
 
     seen = set(state.get("sources_seen", []))
-    new_items = []
 
     for item in items:
-        if item["id"] not in seen:
+        if not FORCE_REFRESH and item["id"] in seen:
+            continue
+        if not DRY_RUN:
             seen.add(item["id"])
-            new_items.append(item)
 
-    state["sources_seen"] = list(seen)
+        # SEMANTIC filter
+        desert_vec = np.array(state["desert_vector"])
+        text = item["title"] + " " + item.get("summary", "")
+        article_vec = embed_text(text)
+        semantic_score = cosine_similarity(article_vec, desert_vec)
 
-    for item in new_items:
-        decision = decide(item)
+        rule_score = score(item)
+
+        final_score = semantic_score * 2.0 + rule_score * 0.5
+
+        decision = "consider" if final_score >= 0.65 else "ignore"
+
+        print(
+            f"S:{semantic_score:.2f} "
+            f"R:{rule_score:.2f} "
+            f"F:{final_score:.2f} → {decision.upper()} | {item['title']}"
+        )
 
         if decision == "consider":
             result = summarize(item, state.get("global_summary", ""))
 
             if result["novel"]:
                 update = result["update"]
-                region = detect_region(item)
+                # Region Semantic
 
+                region_text = item["title"] + " " + item.get("summary", "")
+                region, region_score = detect_region_semantic(region_text, state)
+                print(f"REGION {region} ({region_score:.2f})")
+
+                # topic semantic
+                topic_text = item["title"] + " " + item.get("summary", "")
+                topic, topic_score = detect_topic_semantic(topic_text, state)
+
+                print(f"TOPIC {topic} ({topic_score:.2f})")
                 # --- GLOBAL MEMORY ---
                 state["global_updates"].append({
                     "source": item["title"],
                     "region": region,
+                    "topic": topic,
                     "update": update
                 })
 
@@ -63,6 +129,12 @@ def main():
                 state["regions"][region]["confidence"] += confidence_delta(item["source"])
 
                 print(f"UPDATED ({region}): {item['title']}")
+                # Track topic stats
+                if "topics" not in state:
+                    state["topics"] = {}
+                    if topic not in state["topics"]:
+                        state["topics"][topic] = 0
+                    state["topics"][topic] += 1
 
             else:
                 print(f"REINFORCED: {item['title']}")
@@ -72,7 +144,9 @@ def main():
 
 
     state["last_run"] = datetime.now(UTC).isoformat()
-    save_state(state)
+    if not DRY_RUN:
+        state["sources_seen"] = list(seen)
+        save_state(state)
 
 if __name__ == "__main__":
     main()
