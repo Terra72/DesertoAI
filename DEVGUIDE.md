@@ -10,3 +10,4 @@ python run.py
 pip install openai
 pip install python-dotenv
 pip install feedparser
+pip install openai numpy

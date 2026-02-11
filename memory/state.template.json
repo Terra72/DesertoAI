@@ -3,5 +3,8 @@
   "global_updates": [],
   "regions": {},
   "sources_seen": [],
+  "desert_vector": null,
+  "region_vectors": {},
+  "embeddings_cache": {},
   "last_run": null
 }
