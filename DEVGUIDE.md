@@ -5,6 +5,10 @@
 python run.py
 
 python run.py -f -d
+
+python -m agent.debugger
+
+python -m db.init_db
 ## optional args
 -f --force
 -d --dry-run

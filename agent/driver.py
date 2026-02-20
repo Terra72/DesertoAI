@@ -9,7 +9,7 @@ from analyze.region_semantic import ensure_region_vectors, detect_region_semanti
 from analyze.topic_semantic import ensure_topic_vectors, detect_topic_semantic
 from analyze.confidence import confidence_delta
 from memory.db import get_connection
-
+from db.init_db import init_db
 
 class DesertificationAgent:
 
@@ -19,6 +19,7 @@ class DesertificationAgent:
         self.dry_run = dry_run
 
         self._init_vectors()
+        init_db()
 
     # ---------- Initialization ----------
 
