@@ -3,6 +3,8 @@
 # Running the code
 .venv\Scripts\Activate.ps1
 python run.py
+
+python run.py -f -d
 ## optional args
 -f --force
 -d --dry-run

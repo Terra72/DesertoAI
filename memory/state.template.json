@@ -1,12 +1,13 @@
 {
+  
+  "last_run": null,
+  "sources_seen": [],
   "global_summary": "",
   "global_updates": [],
   "regions": {},
-  "sources_seen": [],
   "desert_vector": null,
   "region_vectors": {},
   "topic_vectors": {},
   "topics": {},
-  "embeddings_cache": {},
-  "last_run": null
+  "embeddings_cache": {}
 }
