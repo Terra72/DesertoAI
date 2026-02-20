@@ -10,6 +10,7 @@ from analyze.topic_semantic import ensure_topic_vectors, detect_topic_semantic
 from analyze.confidence import confidence_delta
 from memory.db import get_connection
 from db.init_db import init_db
+from models.event import Event
 
 class DesertificationAgent:
 
@@ -116,6 +117,8 @@ class DesertificationAgent:
             summary=update,
             confidence_delta=confidence_delta(item["source"])
         )
+
+        event.save()
 
         print(f"UPDATED ({region}): {item['title']}")
         return event
