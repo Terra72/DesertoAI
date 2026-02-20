@@ -8,6 +8,7 @@ python run.py -f -d
 
 python -m agent.debugger
 
+# DB is initialized in run but you can manually create it:
 python -m db.init_db
 ## optional args
 -f --force
