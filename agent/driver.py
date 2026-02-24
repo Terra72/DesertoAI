@@ -5,12 +5,12 @@ from ingest.rss import fetch_items
 from trigger.filter import score
 from analyze.summarize import summarize
 from analyze.embedding import embed_text, cosine_similarity
-from analyze.region_semantic import ensure_region_vectors, detect_region_semantic
+from analyze.region_semantic import init_region_vectors, detect_region_semantic
 from analyze.topic_semantic import ensure_topic_vectors, detect_topic_semantic
 from analyze.confidence import confidence_delta
-from memory.db import get_connection
 from db.init_db import init_db
 from models.event import Event
+from db.repository import EventRepository
 
 class DesertificationAgent:
 
@@ -36,7 +36,7 @@ class DesertificationAgent:
             vec = embed_text(concept_text)
             self.state["desert_vector"] = vec.tolist()
 
-        ensure_region_vectors(self.state)
+        init_region_vectors(self.state)   
         ensure_topic_vectors(self.state)
 
     # ---------- Main Loop ----------
@@ -101,24 +101,33 @@ class DesertificationAgent:
         result = summarize(item, self.state.get("global_summary", ""))
 
         if not result["novel"]:
-            print(f"REINFORCED: {item['title']}")
-            return None
+            signal_type = "reinforcement"
+        else:
+            signal_type = "new"
 
         update = result["update"]
+        signal_type = "reinforcement" if not result["novel"] else "new"
 
         event = Event(
             source_id=item["id"],
             title=item["title"],
+            url=item.get("link"),
             region=region,
+            subregion=None,
+            country=None,
             topic=topic,
+            signal_type=signal_type,
+            impact_direction="neutral",  # improve later
             semantic_score=semantic_score,
             rule_score=rule_score,
             final_score=final_score,
             summary=update,
-            confidence_delta=confidence_delta(item["source"])
+            confidence_delta=confidence_delta(item["source"]),
+            published_at=item.get("published"),
+            ingested_at=datetime.now(UTC).isoformat()
         )
-
-        event.save()
+        repo = EventRepository()
+        repo.save(event)
 
         print(f"UPDATED ({region}): {item['title']}")
         return event
