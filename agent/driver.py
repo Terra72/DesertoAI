@@ -5,10 +5,12 @@ from ingest.rss import fetch_items
 from trigger.filter import score
 from analyze.summarize import summarize
 from analyze.embedding import embed_text, cosine_similarity
-from analyze.region_semantic import ensure_region_vectors, detect_region_semantic
+from analyze.region_semantic import init_region_vectors, detect_region_semantic
 from analyze.topic_semantic import ensure_topic_vectors, detect_topic_semantic
 from analyze.confidence import confidence_delta
-
+from db.init_db import init_db
+from models.event import Event
+from db.repository import EventRepository
 
 class DesertificationAgent:
 
@@ -18,6 +20,7 @@ class DesertificationAgent:
         self.dry_run = dry_run
 
         self._init_vectors()
+        init_db()
 
     # ---------- Initialization ----------
 
@@ -33,7 +36,7 @@ class DesertificationAgent:
             vec = embed_text(concept_text)
             self.state["desert_vector"] = vec.tolist()
 
-        ensure_region_vectors(self.state)
+        init_region_vectors(self.state)   
         ensure_topic_vectors(self.state)
 
     # ---------- Main Loop ----------
@@ -56,7 +59,12 @@ class DesertificationAgent:
             if not self.dry_run:
                 seen.add(item["id"])
 
-            self._process_item(item, desert_vec)
+            event = self._process_item(item, desert_vec)
+
+            if event:
+                self._apply_event(event)
+                # later:
+                # event.save(conn)
 
         if not self.dry_run:
             self.state["sources_seen"] = list(seen)
@@ -82,51 +90,75 @@ class DesertificationAgent:
         )
 
         if decision == "ignore":
-            print(f"IGNORED: {item['title']}")
-            return
+            return None
 
-        # ---------- Region ----------
         region, region_score = detect_region_semantic(text, self.state)
-        print(f"REGION {region} ({region_score:.2f})")
-
-        # ---------- Topic ----------
         topic, topic_score = detect_topic_semantic(text, self.state)
+
+        print(f"REGION {region} ({region_score:.2f})")
         print(f"TOPIC {topic} ({topic_score:.2f})")
 
-        # ---------- Summary ----------
         result = summarize(item, self.state.get("global_summary", ""))
 
         if not result["novel"]:
-            print(f"REINFORCED: {item['title']}")
-            return
+            signal_type = "reinforcement"
+        else:
+            signal_type = "new"
 
         update = result["update"]
+        signal_type = "reinforcement" if not result["novel"] else "new"
+
+        event = Event(
+            source_id=item["id"],
+            title=item["title"],
+            url=item.get("link"),
+            region=region,
+            subregion=None,
+            country=None,
+            topic=topic,
+            signal_type=signal_type,
+            impact_direction="neutral",  # improve later
+            semantic_score=semantic_score,
+            rule_score=rule_score,
+            final_score=final_score,
+            summary=update,
+            confidence_delta=confidence_delta(item["source"]),
+            published_at=item.get("published"),
+            ingested_at=datetime.now(UTC).isoformat()
+        )
+        repo = EventRepository()
+        repo.save(event)
+
+        print(f"UPDATED ({region}): {item['title']}")
+        return event
+
+    def _apply_event(self, event):
 
         # ---------- Global ----------
         self.state["global_updates"].append({
-            "source": item["title"],
-            "region": region,
-            "topic": topic,
-            "update": update
+            "source": event.title,
+            "region": event.region,
+            "topic": event.topic,
+            "update": event.summary
         })
 
         self.state["global_summary"] = (
-            self.state["global_summary"] + "\n" + update
+            self.state["global_summary"] + "\n" + event.summary
         ).strip()
 
-        # ---------- Region Memory ----------
-        if region not in self.state["regions"]:
-            self.state["regions"][region] = {
+        # ---------- Region ----------
+        if event.region not in self.state["regions"]:
+            self.state["regions"][event.region] = {
                 "summary": "",
                 "confidence": 0.0,
                 "updates": []
             }
 
-        self.state["regions"][region]["updates"].append(update)
-        self.state["regions"][region]["summary"] = (
-            self.state["regions"][region]["summary"] + "\n" + update
+        region_data = self.state["regions"][event.region]
+
+        region_data["updates"].append(event.summary)
+        region_data["summary"] = (
+            region_data["summary"] + "\n" + event.summary
         ).strip()
 
-        self.state["regions"][region]["confidence"] += confidence_delta(item["source"])
-
-        print(f"UPDATED ({region}): {item['title']}")
+        region_data["confidence"] += event.confidence_delta    

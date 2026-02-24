@@ -45,4 +45,7 @@ def detect_topic_semantic(text, state):
             best_score = sim
             best_topic = topic
 
+    if best_score < 0.35:
+        return "unknown", best_score
+
     return best_topic, best_score

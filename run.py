@@ -4,6 +4,7 @@ load_dotenv()
 import argparse
 from memory.store import load_state, save_state
 from agent.driver import DesertificationAgent
+from db.schema import init_db
 
 
 parser = argparse.ArgumentParser()
@@ -14,7 +15,7 @@ args = parser.parse_args()
 
 def main():
     state = load_state()
-
+    init_db()
     agent = DesertificationAgent(
         state=state,
         force=args.force,
