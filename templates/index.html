@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Desertification Intelligence Map</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <style>
+        #map { height: 90vh; }
+        #info {
+            padding: 10px;
+            background: white;
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            width: 300px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.3);
+        }
+    </style>
+</head>
+<body>
+
+<div id="map"></div>
+<div id="info">Hover over a region</div>
+
+<script>
+var map = L.map('map').setView([20, 0], 2);
+
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+}).addTo(map);
+
+// You will later replace this with real geojson boundaries
+var regions = {
+    africa: [0, 20],
+    europe: [50, 10],
+    asia: [30, 90],
+    australia: [-25, 135],
+    north_america: [40, -100],
+    south_america: [-15, -60]
+};
+
+for (const [region, coords] of Object.entries(regions)) {
+    var marker = L.marker(coords).addTo(map);
+
+    marker.on("mouseover", function() {
+        fetch("/region/" + region)
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById("info").innerHTML =
+                "<b>" + data.title + "</b><br>" +
+                data.summary + "<br><i>" +
+                data.signal_type + "</i>";
+        });
+    });
+}
+</script>
+
+</body>
+</html>

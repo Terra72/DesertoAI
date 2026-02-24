@@ -8,6 +8,9 @@ python run.py -f -d
 
 python -m agent.debugger
 
+# Running UI
+python app.py
+http://127.0.0.1:5000/
 # DB is initialized in run but you can manually create it:
 python -m db.init_db
 ## optional args
@@ -18,3 +21,4 @@ pip install openai
 pip install python-dotenv
 pip install feedparser
 pip install openai numpy
+pip install flask
