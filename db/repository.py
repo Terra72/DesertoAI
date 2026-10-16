@@ -7,8 +7,11 @@ class EventRepository:
     def __init__(self):
         self.db_path = DB_PATH
 
+    def _connect(self):
+        return sqlite3.connect(self.db_path)
+
     def save(self, event: Event):
-        conn = sqlite3.connect(self.db_path)
+        conn = self._connect()
         cur = conn.cursor()
 
         cur.execute("""
@@ -42,3 +45,20 @@ class EventRepository:
 
         conn.commit()
         conn.close()
+
+
+    def get_latest_by_region(self, region: str):
+        conn = self._connect()
+        cur = conn.cursor()
+
+        cur.execute("""
+            SELECT title, summary, signal_type, impact_direction, ingested_at
+            FROM events
+            WHERE region = ?
+            ORDER BY ingested_at DESC
+            LIMIT 1
+        """, (region,))
+
+        row = cur.fetchone()
+        conn.close()
+        return row
