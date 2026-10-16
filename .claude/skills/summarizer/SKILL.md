@@ -26,6 +26,7 @@ Use exactly this template. Omit any section that has no entries.
 # Week YYYY-Www (Mon DD Mon – Sun DD Mon)
 - <weekly title>
 - <weekly random quote from Art of War>
+
 ## Done
 - <what changed, one line, plain words> (<short hash or PR #>)
 
@@ -43,4 +44,5 @@ Use exactly this template. Omit any section that has no entries.
 - Plain words. No adjectives like "significant" or "robust", no intro, no closing remarks.
 - Name features and files as they appear in the repo (e.g. region map endpoint, `ISSUES.md`).
 - Stay under about 15 lines total. If it's longer, merge or cut the least important items.
-- Don't invent. Every line must trace to a commit.
+- Don't invent. Every line under Done, Open and Notes must trace to a commit or an `ISSUES.md` entry. The title and quote are the only exceptions.
+- The title and quote are required on every summary. Use a real Art of War quote, not a paraphrase, and pick a different title and quote each week.
