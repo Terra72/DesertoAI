@@ -1,4 +1,4 @@
-from analyze.embedding import embed_text, cosine_similarity
+from deserto.embedding import embed_text, cosine_similarity
 import numpy as np
 
 
@@ -14,21 +14,21 @@ TOPIC_CONCEPTS = {
 }
 
 
-def ensure_topic_vectors(state):
+def ensure_topic_vectors(state, embed=embed_text):
     if "topic_vectors" not in state:
         state["topic_vectors"] = {}
 
     for topic, text in TOPIC_CONCEPTS.items():
         if topic not in state["topic_vectors"] or not state["topic_vectors"][topic]:
             print(f"Building topic vector: {topic}")
-            vec = embed_text(text)
+            vec = embed(text)
             if vec is None:
                 raise RuntimeError(f"Embedding failed for topic {topic}")
             state["topic_vectors"][topic] = vec.tolist()
 
 
-def detect_topic_semantic(text, state):
-    article_vec = embed_text(text)
+def detect_topic_semantic(text, state, embed=embed_text):
+    article_vec = embed(text)
     if article_vec is None:
         return "unknown", 0.0
 

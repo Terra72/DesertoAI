@@ -1,4 +1,4 @@
-from analyze.embedding import embed_text, cosine_similarity
+from deserto.embedding import embed_text, cosine_similarity
 import numpy as np
 
 
@@ -13,20 +13,20 @@ REGION_DEFINITIONS = {
 }
 
 
-def init_region_vectors(state):
+def init_region_vectors(state, embed=embed_text):
     if "region_vectors" not in state:
         state["region_vectors"] = {}
 
     for region, description in REGION_DEFINITIONS.items():
         if region not in state["region_vectors"]:
-            vec = embed_text(description)
+            vec = embed(description)
             state["region_vectors"][region] = vec.tolist()  # ✅ FIX
 
     return state["region_vectors"]
 
 
-def detect_region_semantic(text, state):
-    article_vec = embed_text(text)
+def detect_region_semantic(text, state, embed=embed_text):
+    article_vec = embed(text)
     region_vectors = state["region_vectors"]
 
     best_region = "global"

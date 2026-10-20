@@ -1,26 +1,31 @@
 from datetime import datetime, UTC
 import numpy as np
 
-from ingest.rss import fetch_items
-from trigger.filter import score
-from analyze.summarize import summarize
-from analyze.embedding import embed_text, cosine_similarity
-from analyze.region_semantic import init_region_vectors, detect_region_semantic
-from analyze.topic_semantic import ensure_topic_vectors, detect_topic_semantic
-from analyze.confidence import confidence_delta
-from db.init_db import init_db
-from models.event import Event
-from db.repository import EventRepository
+from deserto.relevance import score
+from deserto.embedding import cosine_similarity
+from deserto.classify.region_semantic import init_region_vectors, detect_region_semantic
+from deserto.classify.topic_semantic import ensure_topic_vectors, detect_topic_semantic
+from deserto.classify.confidence import confidence_delta
+from deserto.models import Event
 
-class DesertificationAgent:
+class Pipeline:
+    """ingest -> relevance -> classify -> summarize -> store.
 
-    def __init__(self, state, force=False, dry_run=False):
+    All I/O (feed fetch, embeddings, LLM summary, DB) is injected so tests run
+    offline.
+    """
+
+    def __init__(self, state, fetch_items, embed, summarize, repo,
+                 force=False, dry_run=False):
         self.state = state
+        self.fetch_items = fetch_items
+        self.embed = embed
+        self.summarize = summarize
+        self.repo = repo
         self.force = force
         self.dry_run = dry_run
 
         self._init_vectors()
-        init_db()
 
     # ---------- Initialization ----------
 
@@ -33,16 +38,16 @@ class DesertificationAgent:
             drought resilience, FMNR, sand stabilization,
             sustainable land management, nature-based solutions for drylands
             """
-            vec = embed_text(concept_text)
+            vec = self.embed(concept_text)
             self.state["desert_vector"] = vec.tolist()
 
-        init_region_vectors(self.state)   
-        ensure_topic_vectors(self.state)
+        init_region_vectors(self.state, self.embed)
+        ensure_topic_vectors(self.state, self.embed)
 
     # ---------- Main Loop ----------
 
     def run(self):
-        items = fetch_items()
+        items = self.fetch_items()
 
         if self.force:
             print("FORCE MODE: Reprocessing all items")
@@ -75,7 +80,7 @@ class DesertificationAgent:
     def _process_item(self, item, desert_vec):
 
         text = item["title"] + " " + item.get("summary", "")
-        article_vec = embed_text(text)
+        article_vec = self.embed(text)
 
         semantic_score = cosine_similarity(article_vec, desert_vec)
         rule_score = score(item)
@@ -92,13 +97,13 @@ class DesertificationAgent:
         if decision == "ignore":
             return None
 
-        region, region_score = detect_region_semantic(text, self.state)
-        topic, topic_score = detect_topic_semantic(text, self.state)
+        region, region_score = detect_region_semantic(text, self.state, self.embed)
+        topic, topic_score = detect_topic_semantic(text, self.state, self.embed)
 
         print(f"REGION {region} ({region_score:.2f})")
         print(f"TOPIC {topic} ({topic_score:.2f})")
 
-        result = summarize(item, self.state.get("global_summary", ""))
+        result = self.summarize(item, self.state.get("global_summary", ""))
 
         if not result["novel"]:
             signal_type = "reinforcement"
@@ -126,8 +131,8 @@ class DesertificationAgent:
             published_at=item.get("published"),
             ingested_at=datetime.now(UTC).isoformat()
         )
-        repo = EventRepository()
-        repo.save(event)
+        if not self.dry_run:
+            self.repo.save(event)
 
         print(f"UPDATED ({region}): {item['title']}")
         return event

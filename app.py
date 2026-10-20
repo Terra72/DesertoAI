@@ -1,5 +1,5 @@
 from flask import Flask, jsonify, render_template
-from db.repository import EventRepository
+from deserto.store.repository import EventRepository
 
 app = Flask(__name__)
 repo = EventRepository()

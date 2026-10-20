@@ -2,7 +2,7 @@ from openai import OpenAI
 import os
 import json
 
-client = OpenAI()
+from deserto.config import SUMMARIZE_MODEL
 
 SYSTEM_PROMPT = """
 You are an environmental research assistant.
@@ -30,7 +30,7 @@ Respond in JSON with:
 """
 
     response = client.chat.completions.create(
-        model="gpt-4o-mini",
+        model=SUMMARIZE_MODEL,
         messages=[
             {"role": "system", "content": SYSTEM_PROMPT},
             {"role": "user", "content": prompt}
