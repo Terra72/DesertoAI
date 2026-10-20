@@ -29,3 +29,9 @@ Domain language for DesertoAI. Use these terms in code, issues, PRs and prompts.
 **Tier 0 / 1 / 2**: Merge policy for agent PRs. Tier 0 auto-merges, Tier 1 needs a human merge, Tier 2 is never touched by agents. See ADR-0002.
 
 **Agent-found / agent-ready**: Issue labels. `agent-found` is filed by the Finder (status `new`). A human promotes it to `agent-ready` (status `defined`) before the Implementer may work on it.
+
+**Quality gate**: The required, non-regressing eval-score CI check on Tier 1 PRs, active once Step 2 lands. See ADR-0003.
+
+**Protected path**: A path agents cannot edit and only a human merges, such as the eval set. See ADR-0003.
+
+**Failure policy**: A failed item is skipped and logged, never defaulted. More than 20% failures in a run turns it red. See ADR-0003.
