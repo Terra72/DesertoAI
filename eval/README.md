@@ -13,7 +13,9 @@ Hand-labelled articles used to measure classification accuracy (ADR-0001 accepta
 ```
 
 ## Allowed values
-`region` (ADR-0001): `sahel-west-africa`, `horn-east-africa`, `southern-africa`, `mediterranean-southern-europe`, `mena`, `central-asia`, `south-east-asia`, `australia`, `americas-drylands`, `global`, `multi-region`.
+`region` (ADR-0001, ADR-0004): parents `north-america`, `south-america`, `africa`, `north-asia`, `east-asia`, `europe`, `oceania`, `middle-east` (see `eval/taxonomy.py` for which leaves each contains); leaves `sahel-west-africa`, `horn-east-africa`, `southern-africa`, `mediterranean-southern-europe`, `mena`, `central-asia`, `south-east-asia`, `australia`, `americas-drylands`, `global`, `multi-region`.
+
+Use a parent when the article is about the continent or doesn't pin a sub-region (e.g. the Great Green Wall as a whole: `africa`). Use a leaf when it does (e.g. a Niger project: `sahel-west-africa`). A parent label is satisfied by any child prediction; a leaf label is not satisfied by a parent prediction.
 
 `topic`: `fmnr`, `agroforestry`, `water`, `soil`, `policy`, `funding`, `technology`, `ecosystem`.
 

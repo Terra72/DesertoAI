@@ -12,7 +12,7 @@ Domain language for DesertoAI. Use these terms in code, issues, PRs and prompts.
 
 **Relevance**: Whether an item is about desertification, land degradation or dryland restoration. Decided before classification.
 
-**Region**: The single geographic grouping of an event, from the fixed taxonomy in ADR-0001. Every event has exactly one. `global` is an explicit value for genuinely global items, never a fallback. `multi-region` is allowed only when an item truly spans several.
+**Region**: The single geographic grouping of an event, from the two-level taxonomy in ADR-0001 and ADR-0004 (parent regions such as `africa` and `middle-east` contain leaf regions). Every event has exactly one. `global` is an explicit value for genuinely global items, never a fallback. `multi-region` is allowed only when an item truly spans several.
 
 **Topic**: The theme of an event (e.g. fmnr, agroforestry, water, soil, policy, funding, technology, ecosystem).
 

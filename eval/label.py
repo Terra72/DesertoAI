@@ -7,16 +7,12 @@ The classifier is never consulted: labels are yours.
 import json
 from pathlib import Path
 
+from eval.taxonomy import REGIONS, TOPICS
+
 HERE = Path(__file__).parent
 CANDIDATES = HERE / "candidates.jsonl"
 EVAL_SET = HERE / "eval_set.jsonl"
 
-REGIONS = [
-    "sahel-west-africa", "horn-east-africa", "southern-africa",
-    "mediterranean-southern-europe", "mena", "central-asia", "south-east-asia",
-    "australia", "americas-drylands", "global", "multi-region",
-]
-TOPICS = ["fmnr", "agroforestry", "water", "soil", "policy", "funding", "technology", "ecosystem"]
 
 
 def load(path):

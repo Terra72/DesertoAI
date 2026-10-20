@@ -1,6 +1,6 @@
 # ADR-0001: Fixed region taxonomy, no "Global" fallback
 
-Status: accepted (starting point, revisable through a new ADR)
+Status: accepted (starting point, revisable through a new ADR). Amended by ADR-0004.
 
 ## Context
 Two competing region methods exist: keyword matching (4 regions) and embedding similarity (6 continents) with a "global" fallback below a score of 0.30. Events are misclassified, some regions lack data, and the fallback hides failures (ISSUE-001).
