@@ -2,17 +2,16 @@
 
 # Running the code
 .venv\Scripts\Activate.ps1
-python run.py
+python -m deserto
 
-python run.py -f -d
+python -m deserto -f -d
 
-python -m agent.debugger
+python -m deserto.debug
 
 # Running UI
 python app.py
 http://127.0.0.1:5000/
-# DB is initialized in run but you can manually create it:
-python -m db.init_db
+# DB is initialized on every run (deserto/store/schema.py)
 ## optional args
 -f --force
 -d --dry-run

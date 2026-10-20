@@ -1,6 +1,6 @@
 import sqlite3
-from config import DB_PATH
-from models.event import Event
+from deserto.config import DB_PATH
+from deserto.models import Event
 
 class EventRepository:
 

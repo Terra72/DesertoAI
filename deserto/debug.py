@@ -1,4 +1,4 @@
-from db.queries import Queries
+from deserto.store.queries import Queries
 
 q = Queries()
 rows = q.select_all_events()

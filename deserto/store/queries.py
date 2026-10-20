@@ -1,6 +1,6 @@
 import sqlite3
 from typing import List, Tuple, Any
-from config import DB_PATH
+from deserto.config import DB_PATH
 
 
 class Queries:

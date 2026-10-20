@@ -2,3 +2,5 @@
 __pycache__
 memory/state.json
 .env
+# local data (a small fixture dataset is tracked from Step 1)
+*.db
