@@ -9,6 +9,7 @@ python -m deserto -f -d
 python -m deserto.debug
 
 # Running UI
+python -m deserto.fixture   # load eval-set fixture (offline)
 python app.py
 http://127.0.0.1:5000/
 # DB is initialized on every run (deserto/store/schema.py)
