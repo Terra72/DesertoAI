@@ -1,0 +1,8 @@
+# Tier 2 and protected paths: human review required (ADR-0002, ADR-0003)
+/eval/                  @Terra72
+/.github/               @Terra72
+/.claude/               @Terra72
+/deserto/config.py      @Terra72
+/.env.template          @Terra72
+/docs/adr/              @Terra72
+/docs/scope.md          @Terra72
