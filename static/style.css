@@ -1,0 +1,10 @@
+#map { height: 90vh; }
+#info {
+    padding: 10px;
+    background: white;
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    width: 300px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.3);
+}
