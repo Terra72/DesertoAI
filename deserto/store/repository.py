@@ -1,6 +1,7 @@
 import sqlite3
 from deserto.config import DB_PATH
 from deserto.models import Event
+from eval.taxonomy import PARENTS, REGIONS
 
 class EventRepository:
 
@@ -62,3 +63,47 @@ class EventRepository:
         row = cur.fetchone()
         conn.close()
         return row
+
+    def get_events(self, region=None, topic=None, signal_type=None, limit=50):
+        """Newest first. A parent region also matches events stored under its leaves."""
+        where, params = [], []
+        if region is not None:
+            regions = [region] + PARENTS.get(region, [])
+            where.append(f"region IN ({', '.join('?' * len(regions))})")
+            params += regions
+        if topic is not None:
+            where.append("topic = ?")
+            params.append(topic)
+        if signal_type is not None:
+            where.append("signal_type = ?")
+            params.append(signal_type)
+
+        sql = """
+            SELECT title, summary, url, topic, region, signal_type,
+                   impact_direction, published_at, ingested_at
+            FROM events
+        """
+        if where:
+            sql += "WHERE " + " AND ".join(where) + " "
+        sql += "ORDER BY ingested_at DESC, id DESC LIMIT ?"
+
+        conn = self._connect()
+        conn.row_factory = sqlite3.Row
+        cur = conn.cursor()
+        cur.execute(sql, params + [limit])
+        rows = [dict(r) for r in cur.fetchall()]
+        conn.close()
+        return rows
+
+    def count_by_region(self):
+        """Event count for every taxonomy region. A parent counts its leaves too."""
+        conn = self._connect()
+        cur = conn.cursor()
+        cur.execute("SELECT region, COUNT(*) FROM events GROUP BY region")
+        counts = dict(cur.fetchall())
+        conn.close()
+
+        return {
+            r: sum(counts.get(x, 0) for x in [r] + PARENTS.get(r, []))
+            for r in REGIONS
+        }
