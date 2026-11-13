@@ -7,4 +7,62 @@
     left: 10px;
     width: 300px;
     box-shadow: 0 0 10px rgba(0,0,0,0.3);
+    z-index: 1000; /* above the Leaflet panes */
 }
+
+/* Side panel, above the map and Leaflet controls */
+#panel {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 360px;
+    max-width: 100%;
+    overflow-y: auto;
+    font-family: system-ui, sans-serif;
+    background: white;
+    box-shadow: 0 0 10px rgba(0,0,0,0.3);
+    z-index: 1100;
+}
+#panel header {
+    position: sticky;
+    top: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 10px;
+    background: white;
+    border-bottom: 1px solid #ddd;
+}
+#panel h2 { margin: 0; font-size: 18px; }
+#panel-count { margin: 2px 0 0; font-size: 13px; color: #666; }
+#panel-close {
+    border: 0;
+    background: none;
+    font-size: 24px;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.event { padding: 10px; border-bottom: 1px solid #eee; }
+.event h3 { margin: 0 0 4px; font-size: 15px; }
+.event .summary { margin: 0 0 6px; font-size: 14px; }
+.meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 10px;
+    font-size: 12px;
+    color: #666;
+}
+.badge {
+    padding: 1px 8px;
+    border-radius: 10px;
+    color: white;
+    background: #888;
+}
+.badge[data-signal="new"] { background: #2e7d32; }
+.badge[data-signal="reinforcement"] { background: #1565c0; }
+.muted { color: #999; }
+.state { padding: 10px; margin: 0; color: #666; }
+.state.error { color: #b00020; }
