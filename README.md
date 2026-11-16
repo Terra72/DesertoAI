@@ -1,7 +1,7 @@
 # DesertoAI
-Welcome to my AI agent based Desertification Tracker (Research, news, global progress). I started this project with the intent of seeing how powerful agents can be to aid in a Research and heuristic based idea. To see if the agents could learn in some way what a human would appreciate in relevant news to a globally reported topic. Specifically Desertification. 
+Welcome to my AI agent based Desertification Tracker (Research, news, global progress). I started this project with the intent of seeing how powerful agents can be to aid in analyzing a more human and heuristic concept like what I deem as authentic news or scientific progress versus information fluff so to speak. To see if the agents could learn in some way what a human would appreciate in relevant news to a globally reported topic. Specifically Desertification. 
 
-Hopefully when the workload is more automated I can expand the scraping to a more general Environmental news scraping feed, that provides interesting snippets of news from various articles around the world and shows how positively or negatively climate science and environmental policy is shaping globally.
+While mainly focusing on the topic of Desertification, hopefully when the workload is more automated I can expand the scraping to more general environmental news, that provides interesting snippets of news from various articles around the world and shows how positively or negatively climate science and environmental policy is progressing globally.
 
 # Intro
 The initial goal of this project was to find where we can use Agents effectively. test them out with different tasks and create a continuously developing project that we can monitor and guide as it goes.
