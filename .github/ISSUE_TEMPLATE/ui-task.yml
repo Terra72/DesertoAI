@@ -1,0 +1,23 @@
+name: UI task
+description: Small UI change the weekly agent can pick up
+labels: ["agent-ui"]
+body:
+  - type: textarea
+    id: change
+    attributes:
+      label: What should change
+      description: One small, self-contained UI change (templates/ or static/ only).
+    validations:
+      required: true
+  - type: textarea
+    id: done
+    attributes:
+      label: Done when
+      description: Checkable acceptance criteria.
+    validations:
+      required: true
+  - type: textarea
+    id: hints
+    attributes:
+      label: Files or hints
+      description: Optional. Relevant files, screenshots, examples.
