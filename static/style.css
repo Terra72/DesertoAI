@@ -1,13 +1,99 @@
+/* 8-bit African savannah theme. See .claude/skills/ui-theme/SKILL.md */
+:root {
+    --sand: #e8c872;   /* page background */
+    --dust: #c98f3c;   /* panels, secondary surfaces */
+    --acacia: #3b6b2f; /* headers, positive accents */
+    --sunset: #d9531e; /* highlights, buttons, alerts */
+    --earth: #5a3a1e;  /* borders, body text */
+    --night: #1e1b2e;  /* dark surfaces, header text bg */
+
+    --pixel: "Press Start 2P", monospace;
+    --body: ui-monospace, "Courier New", monospace;
+}
+
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    background: var(--sand);
+    color: var(--earth);
+    font-family: var(--body);
+    font-size: 14px;
+}
+
+/* Themed section header: pixel font on an acacia bar with an earth border */
+.section-head {
+    margin: 0;
+    padding: 8px 10px;
+    font-family: var(--pixel);
+    font-size: 11px;
+    line-height: 1.5;
+    color: var(--sand);
+    background: var(--acacia);
+    border-bottom: 4px solid var(--earth);
+    word-break: break-word;
+}
+
 #map { height: 90vh; }
+
 #info {
-    padding: 10px;
-    background: white;
     position: absolute;
     bottom: 10px;
     left: 10px;
     width: 300px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.3);
+    max-width: calc(100vw - 20px);
+    background: var(--dust);
+    border: 4px solid var(--earth);
+    box-shadow: none;
     z-index: 1000; /* above the Leaflet panes */
+}
+#info-body { padding: 10px; }
+
+/* Legend: a themed key for signal types and the count scale */
+#legend {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 220px;
+    max-width: calc(100vw - 20px);
+    background: var(--dust);
+    border: 4px solid var(--earth);
+    z-index: 1000;
+}
+.legend-body { padding: 10px; }
+.legend-group + .legend-group { margin-top: 10px; }
+.legend-title {
+    margin: 0 0 6px;
+    font-family: var(--pixel);
+    font-size: 9px;
+    color: var(--earth);
+}
+.legend-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 6px;
+    font-size: 13px;
+}
+.legend-row:last-child { margin-bottom: 0; }
+
+/* Count-scale dots mirror the circleMarker colours in app.js */
+.dot {
+    display: inline-block;
+    border-radius: 50%;
+    flex: none;
+    border: 2px solid #8c3b00;
+    background: #e8751a;
+}
+.dot-small { width: 10px; height: 10px; }
+.dot-large { width: 22px; height: 22px; }
+.dot-muted { width: 10px; height: 10px; border-color: #888; background: #bbb; }
+
+/* Keyboard focus: a clear ring on focusable pins and controls */
+#map path:focus,
+#map path:focus-visible {
+    outline: 3px solid var(--night);
+    outline-offset: 2px;
 }
 
 /* Side panel, above the map and Leaflet controls */
@@ -19,9 +105,8 @@
     width: 360px;
     max-width: 100%;
     overflow-y: auto;
-    font-family: system-ui, sans-serif;
-    background: white;
-    box-shadow: 0 0 10px rgba(0,0,0,0.3);
+    background: var(--dust);
+    border-left: 4px solid var(--earth);
     z-index: 1100;
 }
 #panel header {
@@ -30,21 +115,29 @@
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    padding: 10px;
-    background: white;
-    border-bottom: 1px solid #ddd;
+    gap: 8px;
+    background: var(--acacia);
+    border-bottom: 4px solid var(--earth);
 }
-#panel h2 { margin: 0; font-size: 18px; }
-#panel-count { margin: 2px 0 0; font-size: 13px; color: #666; }
+#panel header > div { min-width: 0; flex: 1; }
+/* Title already sits on the acacia header bar, so drop its own border */
+#panel-title { border-bottom: 0; }
+#panel-count { margin: 0 10px 8px; font-size: 13px; color: var(--sand); }
 #panel-close {
     border: 0;
     background: none;
+    color: var(--sand);
     font-size: 24px;
     line-height: 1;
+    padding: 6px 10px;
     cursor: pointer;
 }
+#panel-close:focus-visible {
+    outline: 3px solid var(--sand);
+    outline-offset: -3px;
+}
 
-.event { padding: 10px; border-bottom: 1px solid #eee; }
+.event { padding: 10px; border-bottom: 2px solid var(--earth); }
 .event h3 { margin: 0 0 4px; font-size: 15px; }
 .event .summary { margin: 0 0 6px; font-size: 14px; }
 .meta {
@@ -53,16 +146,35 @@
     align-items: center;
     gap: 4px 10px;
     font-size: 12px;
-    color: #666;
+    color: var(--earth);
 }
 .badge {
-    padding: 1px 8px;
-    border-radius: 10px;
+    padding: 2px 8px;
+    border-radius: 0;
     color: white;
     background: #888;
 }
 .badge[data-signal="new"] { background: #2e7d32; }
 .badge[data-signal="reinforcement"] { background: #1565c0; }
-.muted { color: #999; }
-.state { padding: 10px; margin: 0; color: #666; }
+.event a { color: var(--sunset); }
+.muted { color: #7a6a55; }
+.state { padding: 10px; margin: 0; color: var(--earth); }
 .state.error { color: #b00020; }
+
+/* Narrow screens: stack the panel and overlays full-width and readable */
+@media (max-width: 640px) {
+    #map { height: 60vh; }
+    #panel { width: 100%; border-left: 0; }
+    #info {
+        position: static;
+        width: auto;
+        max-width: none;
+        margin: 10px;
+    }
+    #legend {
+        position: static;
+        width: auto;
+        max-width: none;
+        margin: 10px;
+    }
+}
