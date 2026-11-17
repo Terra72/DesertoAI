@@ -27,7 +27,7 @@ var COORDS = {
     "multi-region": [-30, -15]
 };
 
-var info = document.getElementById("info");
+var info = document.getElementById("info-body");
 
 // Escape feed text before putting it in innerHTML
 function esc(text) {
@@ -171,6 +171,23 @@ function showPanel(region, count) {
     });
 }
 
+// Make a pin reachable by keyboard: Tab to focus (shows hover info),
+// Enter or Space to open the side panel, same as mouse hover and click.
+function makeFocusable(marker, region, count, label) {
+    var node = marker.getElement();
+    if (!node) return;
+    node.setAttribute("tabindex", "0");
+    node.setAttribute("role", "button");
+    node.setAttribute("aria-label", label);
+    node.addEventListener("focus", () => showLatest(region));
+    node.addEventListener("keydown", event => {
+        if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            showPanel(region, count);
+        }
+    });
+}
+
 document.getElementById("panel-close").addEventListener("click", () => {
     opened = null;
     panel.hidden = true;
@@ -198,9 +215,14 @@ fetch("/api/regions")
             weight: 2
         }).addTo(map);
 
+        var label = region + ": " + count + (count === 1 ? " event" : " events");
         marker.bindTooltip(region + ": " + count);
         marker.on("mouseover", () => showLatest(region));
         marker.on("click", () => showPanel(region, count));
+
+        // Keyboard access: make each pin a focusable button.
+        // circleMarker renders as an SVG path once it is on the map.
+        makeFocusable(marker, region, count, label);
     }
 })
 .catch(() => {
