@@ -1,7 +1,23 @@
-var map = L.map('map').setView([20, 0], 2);
+// Show the planet once: lock panning to the world and stop zoom-out at repeats.
+var worldBounds = L.latLngBounds([[-90, -180], [90, 180]]);
+
+var map = L.map('map', {
+    maxBounds: worldBounds,
+    maxBoundsViscosity: 1.0,
+    worldCopyJump: false
+});
 
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    noWrap: true
 }).addTo(map);
+
+// Stop zoom-out at the level where the world just fits, following window resize.
+function fitWorld() {
+    map.setMinZoom(map.getBoundsZoom(worldBounds));
+}
+fitWorld();
+map.fitBounds(worldBounds);
+map.on("resize", fitWorld);
 
 // Pin position [lat, lng] for each ADR-0004 region.
 // global and multi-region have no place, so they sit in the Atlantic.
