@@ -34,7 +34,7 @@ body {
     word-break: break-word;
 }
 
-#map { height: 90vh; }
+#map { height: 103.5vh; }
 
 #info {
     position: absolute;
@@ -163,7 +163,7 @@ body {
 
 /* Narrow screens: stack the panel and overlays full-width and readable */
 @media (max-width: 640px) {
-    #map { height: 60vh; }
+    #map { height: 69vh; }
     #panel { width: 100%; border-left: 0; }
     #info {
         position: static;
