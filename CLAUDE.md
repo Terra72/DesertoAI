@@ -7,3 +7,14 @@ Issues are tracked in GitHub Issues (Terra72/DesertoAI) via the `gh` CLI. See `d
 ### Domain docs
 
 Single-context: one `GLOSSARY.md` and `docs/adr/` at the repo root. See `docs/agents/domain.md`.
+
+{
+  "permissions": {
+    "deny": [
+      "Read(**/.env)",
+      "Read(**/.env.*)",
+      "Edit(**/.env*)",
+      "Write(**/.env*)"
+    ]
+  }
+}
