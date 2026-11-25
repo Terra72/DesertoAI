@@ -43,3 +43,15 @@ def test_vector_init_is_idempotent(embed):
     calls = []
     init_region_vectors(state, lambda t: calls.append(t))
     assert calls == [] and state["region_vectors"].keys() == before.keys()
+
+
+def test_region_definitions_match_taxonomy():
+    from deserto.classify.region_semantic import REGION_DEFINITIONS
+    from eval.taxonomy import REGIONS
+    assert set(REGION_DEFINITIONS) == set(REGIONS) - {"multi-region"}
+
+
+def test_vector_init_drops_undefined_regions(embed):
+    state = {"region_vectors": {"asia": [1.0]}}
+    init_region_vectors(state, embed)
+    assert "asia" not in state["region_vectors"]
