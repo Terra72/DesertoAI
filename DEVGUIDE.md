@@ -18,7 +18,7 @@ http://127.0.0.1:5000/
 -d --dry-run
 # Weekly scrape (GitHub Action, Mondays 06:00 UTC)
 # Needs repo secret OPENAI_API_KEY. Run manually: Actions > Weekly scrape > Run workflow
-# Commits new events to data/exports/events-<year>-W<week>.jsonl
+# Opens a PR adding new events to data/exports/events-<year>-W<week>.jsonl
 python -m deserto.weekly   # same thing locally, writes data/exports
 
 # All pip installs

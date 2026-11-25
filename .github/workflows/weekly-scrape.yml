@@ -9,6 +9,7 @@ concurrency: weekly-scrape
 
 permissions:
   contents: write
+  pull-requests: write
 
 jobs:
   scrape:
@@ -26,11 +27,16 @@ jobs:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: python -m deserto.weekly
 
-      - name: Commit export
+      - name: Open export PR
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           git config user.name "deserto-scraper"
           git config user.email "deserto-scraper@users.noreply.github.com"
           git add data/exports
           git diff --cached --quiet && echo "No new events" && exit 0
-          git commit -m "Add weekly export $(date -u +%G-W%V)"
-          git push
+          week=$(date -u +%G-W%V)
+          git checkout -b "weekly-export-$week-$GITHUB_RUN_ID"
+          git commit -m "Add weekly export $week"
+          git push -u origin HEAD
+          gh pr create --title "Add weekly export $week"             --body "New events from the weekly scrape. Merge, then use Import latest data in the app."
