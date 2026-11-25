@@ -24,6 +24,22 @@ Domain language for DesertoAI. Use these terms in code, issues, PRs and prompts.
 
 **Finder / Implementer / Reviewer / Scribe / Discovery**: The agent roles. See ADR-0002.
 
+**UI agent**: The weekly agent that takes one small UI task (`agent-ui` issue) and opens a PR. It never merges and stays out of protected paths.
+
+**Weekly summary**: A short file recording what changed in the project that week (`summaries/`). Not the global summary of events.
+
+**Global summary**: The running summary of what is known about desertification, updated only when an item brings something new.
+
+**Weekly scrape**: The scheduled run of the pipeline that collects new items and produces an export.
+
+**Export**: The weekly file of events stored by a scrape, committed through a PR. It holds only events not exported before.
+
+**Rollup**: Counting a leaf region's events under its parent region.
+
+**Pin**: The map marker for a region. Selecting it opens the detail panel.
+
+**Detail panel**: The map view of one region's events, opened from a pin.
+
 **Eval set**: The hand-labelled articles (about 40) with expected region and topic, used to measure classification accuracy.
 
 **Tier 0 / 1 / 2**: Merge policy for agent PRs. Tier 0 auto-merges, Tier 1 needs a human merge, Tier 2 is never touched by agents. See ADR-0002.
