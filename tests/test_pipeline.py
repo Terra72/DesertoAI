@@ -1,3 +1,4 @@
+import json
 import sqlite3
 
 from deserto.pipeline import Pipeline
@@ -57,3 +58,14 @@ def test_region_state_accumulates_confidence(db, repo, embed, fresh_state):
     run_pipeline(fresh_state, repo, embed, [RELEVANT])
     (region_data,) = [r for r in fresh_state["regions"].values()]
     assert region_data["confidence"] == 0.25  # FAO
+
+
+def test_load_state_drops_vectors_from_other_model(tmp_path, monkeypatch):
+    from deserto import state as st
+    path = tmp_path / "state.json"
+    path.write_text(json.dumps({"desert_vector": [1.0], "sources_seen": ["a"], "embedding_model": "old"}))
+    monkeypatch.setattr(st, "STATE_PATH", path)
+    s = st.load_state()
+    assert s["desert_vector"] is None
+    assert s["sources_seen"] == ["a"]
+    assert s["embedding_model"] == st.EMBEDDING_MODEL

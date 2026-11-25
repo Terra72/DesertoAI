@@ -16,9 +16,15 @@ http://127.0.0.1:5000/
 ## optional args
 -f --force
 -d --dry-run
+# Weekly scrape (GitHub Action, Mondays 06:00 UTC)
+# Needs repo secret ANTHROPIC_API_KEY. Run manually: Actions > Weekly scrape > Run workflow
+# Opens a PR adding new events to data/exports/events-<year>-W<week>.jsonl
+python -m deserto.weekly   # same thing locally, writes data/exports
+
 # All pip installs
-pip install openai
+pip install anthropic
+pip install sentence-transformers
 pip install python-dotenv
 pip install feedparser
-pip install openai numpy
+pip install numpy
 pip install flask
