@@ -32,11 +32,12 @@ Respond in JSON with:
     response = client.messages.create(
         model=SUMMARIZE_MODEL,
         max_tokens=300,
+        thinking={"type": "disabled"},
         system=SYSTEM_PROMPT,
         messages=[{"role": "user", "content": prompt}],
     )
 
-    content = response.content[0].text
+    content = next(b.text for b in response.content if b.type == "text")
 
     try:
         return json.loads(content)
