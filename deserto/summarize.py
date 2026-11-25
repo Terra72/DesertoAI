@@ -34,7 +34,6 @@ Respond in JSON with:
         max_tokens=300,
         system=SYSTEM_PROMPT,
         messages=[{"role": "user", "content": prompt}],
-        temperature=0,  # deterministic
     )
 
     content = response.content[0].text
@@ -42,7 +41,7 @@ Respond in JSON with:
     try:
         return json.loads(content)
     except json.JSONDecodeError:
-        print("⚠️ Failed to parse LLM response:")
+        print("WARNING: Failed to parse LLM response:")
         print(content)
         return {
             "novel": False,

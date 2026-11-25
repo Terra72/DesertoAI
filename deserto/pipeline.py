@@ -91,7 +91,7 @@ class Pipeline:
         print(
             f"S:{semantic_score:.2f} "
             f"R:{rule_score:.2f} "
-            f"F:{final_score:.2f} → {decision.upper()} | {item['title']}"
+            f"F:{final_score:.2f} -> {decision.upper()} | {item['title']}"
         )
 
         if decision == "ignore":
