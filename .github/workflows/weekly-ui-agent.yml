@@ -21,7 +21,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: pip install openai python-dotenv feedparser numpy flask -r requirements-dev.txt
+      - run: pip install anthropic python-dotenv feedparser numpy flask -r requirements-dev.txt
       - uses: actions/setup-node@v4
         with:
           node-version: "20"

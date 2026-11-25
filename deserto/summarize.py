@@ -1,4 +1,4 @@
-from openai import OpenAI
+import anthropic
 import os
 import json
 
@@ -14,7 +14,7 @@ new knowledge or contradicts existing understanding.
 """
 
 def summarize(item, current_summary):
-    client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+    client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
     prompt = f"""
 Current global summary:
 {current_summary or "(empty)"}
@@ -29,17 +29,15 @@ Respond in JSON with:
 - "update": a 1–2 sentence update if novel, otherwise ""
 """
 
-    response = client.chat.completions.create(
+    response = client.messages.create(
         model=SUMMARIZE_MODEL,
-        messages=[
-            {"role": "system", "content": SYSTEM_PROMPT},
-            {"role": "user", "content": prompt}
-        ],
-        temperature=0, # deterministic
-        response_format={ "type": "json_object" }
+        max_tokens=300,
+        system=SYSTEM_PROMPT,
+        messages=[{"role": "user", "content": prompt}],
+        temperature=0,  # deterministic
     )
 
-    content = response.choices[0].message.content
+    content = response.content[0].text
 
     try:
         return json.loads(content)

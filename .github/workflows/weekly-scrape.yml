@@ -20,11 +20,17 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: pip install openai python-dotenv feedparser numpy
+      - run: |
+          pip install torch --index-url https://download.pytorch.org/whl/cpu
+          pip install anthropic python-dotenv feedparser numpy sentence-transformers
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/huggingface
+          key: hf-all-MiniLM-L6-v2
 
       - name: Scrape and export
         env:
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
         run: python -m deserto.weekly
 
       - name: Open export PR

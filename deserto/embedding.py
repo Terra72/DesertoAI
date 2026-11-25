@@ -1,24 +1,21 @@
-from openai import OpenAI
 import numpy as np
-import os
 
 from deserto.config import EMBEDDING_MODEL
 
-_client = None
+_model = None
 
 
-def _get_client():
-    global _client
-    if _client is None:
-        _client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-    return _client
+def _get_model():
+    # Lazy: tests inject their own embedder and never load the model
+    global _model
+    if _model is None:
+        from sentence_transformers import SentenceTransformer
+        _model = SentenceTransformer(EMBEDDING_MODEL)
+    return _model
+
 
 def embed_text(text: str) -> np.ndarray:
-    response = _get_client().embeddings.create(
-        model=EMBEDDING_MODEL,
-        input=text
-    )
-    return np.array(response.data[0].embedding)
+    return _get_model().encode(text)
 
 
 def cosine_similarity(a: np.ndarray, b: np.ndarray) -> float:
