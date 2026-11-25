@@ -1,0 +1,36 @@
+name: Weekly scrape
+
+on:
+  schedule:
+    - cron: "0 6 * * 1" # Monday 06:00 UTC
+  workflow_dispatch:
+
+concurrency: weekly-scrape
+
+permissions:
+  contents: write
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install openai python-dotenv feedparser numpy
+
+      - name: Scrape and export
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: python -m deserto.weekly
+
+      - name: Commit export
+        run: |
+          git config user.name "deserto-scraper"
+          git config user.email "deserto-scraper@users.noreply.github.com"
+          git add data/exports
+          git diff --cached --quiet && echo "No new events" && exit 0
+          git commit -m "Add weekly export $(date -u +%G-W%V)"
+          git push
